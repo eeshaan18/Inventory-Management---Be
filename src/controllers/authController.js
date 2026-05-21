@@ -15,8 +15,9 @@ const registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // FIX 1: Added warehouse_id to the RETURNING clause just in case the frontend needs it immediately
         const result = await pool.query(
-            'INSERT INTO users (username, password_hash, role, warehouse_id) VALUES ($1, $2, $3, $4) RETURNING id, username, role',
+            'INSERT INTO users (username, password_hash, role, warehouse_id) VALUES ($1, $2, $3, $4) RETURNING id, username, role, warehouse_id',
             [username, hashedPassword, role, warehouse_id || null]
         );
 
@@ -49,7 +50,13 @@ const loginUser = async (req, res) => {
             res.json({
                 success: true,
                 token,
-                user: { id: user.id, username: user.username, role: user.role }
+                // FIX 2: Added warehouse_id here so the frontend knows exactly which location to show!
+                user: { 
+                    id: user.id, 
+                    username: user.username, 
+                    role: user.role,
+                    warehouse_id: user.warehouse_id 
+                }
             });
         } else {
             res.status(401).json({ success: false, message: 'Invalid credentials' });
