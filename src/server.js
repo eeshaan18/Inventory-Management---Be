@@ -9,7 +9,9 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://inventory-management-fe-sigma.vercel.app'],
+    origin: function (origin, callback) {
+        callback(null, true); // Safely allows your Vercel frontend to connect
+    },
     credentials: true
 }));
 app.use(express.json()); // Allows us to parse JSON payloads from Next.js
